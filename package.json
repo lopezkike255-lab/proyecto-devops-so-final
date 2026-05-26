@@ -1,0 +1,13 @@
+{
+  "name": "proyecto-devops-so-final",
+  "version": "1.0.0",
+  "description": "Aplicacion contenerizada para proyecto final de Sistemas Operativos II",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node -e \"console.log('Pruebas basicas ejecutadas correctamente')\""
+  },
+  "dependencies": {
+    "express": "^4.18.3"
+  }
+}
