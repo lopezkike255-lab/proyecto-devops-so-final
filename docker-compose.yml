@@ -1,9 +1,18 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-devops-so-final
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
   app:
     build: .
     container_name: app-devops-so-final
-    ports:
-      - "3000:3000"
     restart: always
     environment:
       DB_HOST: db
@@ -24,8 +33,6 @@ services:
       POSTGRES_DB: devops_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
 volumes:
   postgres_data:
