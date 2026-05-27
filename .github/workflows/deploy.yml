@@ -53,5 +53,6 @@ jobs:
             docker compose down &&
             docker build -t proyecto-devops-so-final-app:latest . &&
             docker stack deploy -c docker-stack.yml devops_stack &&
+            docker service update --force devops_stack_app &&
             docker service ls
           "
