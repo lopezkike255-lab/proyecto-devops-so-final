@@ -33,14 +33,17 @@ jobs:
           printf '%s' "${{ secrets.GCP_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/gcp_key
           chmod 600 ~/.ssh/gcp_key
 
-      - name: Verificar huella de llave SSH
+      - name: Mostrar llave publica generada por GitHub Actions
         run: |
           ssh-keygen -y -f ~/.ssh/gcp_key > ~/.ssh/gcp_key.pub
+          echo "COPIA ESTA LINEA COMPLETA:"
+          cat ~/.ssh/gcp_key.pub
+          echo "HUELLA:"
           ssh-keygen -lf ~/.ssh/gcp_key.pub
 
       - name: Probar conexion SSH
         run: |
-          ssh -vvv -i ~/.ssh/gcp_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no lopezkike255@35.253.218.105 "whoami"
+          ssh -i ~/.ssh/gcp_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no lopezkike255@35.253.218.105 "whoami"
 
       - name: Desplegar en Google Cloud
         run: |
