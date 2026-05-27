@@ -351,13 +351,14 @@ app.get("/", (req, res) => {
         <h1>Proyecto DevOps - Sistemas Operativos II</h1>
 
         <p class="subtitle">
-          Infraestructura Cloud, Docker y Automatización CI/CD
+          Infraestructura Cloud, Docker, Nginx y Automatización CI/CD
         </p>
 
         <p class="description">
-          Este proyecto demuestra la implementación de una aplicación web desplegada en la nube
-          mediante contenedores Docker, utilizando Google Cloud Platform como infraestructura
-          y GitHub Actions como herramienta de integración y despliegue continuo.
+          Este proyecto demuestra la implementación de una infraestructura DevOps en la nube,
+          utilizando Google Cloud Platform, contenedores Docker, Nginx como reverse proxy,
+          PostgreSQL como base de datos y GitHub Actions como herramienta de integración
+          y despliegue continuo.
         </p>
 
         <div class="buttons">
@@ -375,7 +376,7 @@ app.get("/", (req, res) => {
           <h3>Aplicación Web</h3>
           <p>
             Aplicación desarrollada con Node.js y Express para demostrar el funcionamiento
-            del servicio web desplegado.
+            del servicio web desplegado dentro de la infraestructura DevOps.
           </p>
         </div>
 
@@ -388,10 +389,19 @@ app.get("/", (req, res) => {
         </div>
 
         <div class="card">
+          <h3>Nginx / Reverse Proxy</h3>
+          <p>
+            Se implementó Nginx como punto de entrada principal del sistema,
+            redirigiendo el tráfico HTTP desde el puerto 80 hacia la aplicación
+            Node.js ejecutada en contenedores Docker.
+          </p>
+        </div>
+
+        <div class="card">
           <h3>Google Cloud</h3>
           <p>
             Se utilizó una máquina virtual en Google Cloud Platform para alojar
-            el entorno de ejecución del proyecto.
+            el entorno de ejecución del proyecto y exponer la aplicación mediante IP pública.
           </p>
         </div>
 
@@ -399,7 +409,7 @@ app.get("/", (req, res) => {
           <h3>GitHub Actions</h3>
           <p>
             Se configuró un pipeline CI/CD que automatiza la construcción,
-            prueba y despliegue de la aplicación.
+            prueba y despliegue de la aplicación hacia la infraestructura cloud.
           </p>
         </div>
 
@@ -432,8 +442,8 @@ app.get("/", (req, res) => {
         <h2>Estado del Sistema</h2>
         <p>
           La aplicación se encuentra desplegada correctamente en Google Cloud.
-          El pipeline CI/CD fue ejecutado exitosamente desde GitHub Actions,
-          permitiendo actualizar el sistema de forma automática.
+          El tráfico ingresa mediante Nginx como reverse proxy y el pipeline CI/CD
+          permite actualizar el sistema automáticamente desde GitHub Actions.
         </p>
       </div>
       `
@@ -474,6 +484,11 @@ app.get("/health", (req, res) => {
           <div class="info-item">
             <span>Entorno</span>
             <strong>Docker</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Entrada HTTP</span>
+            <strong>Nginx Reverse Proxy</strong>
           </div>
 
           <div class="info-item">
@@ -558,6 +573,11 @@ app.get("/api/tareas", (req, res) => {
       id: 9,
       tarea: "Integrar base de datos PostgreSQL en Docker Compose",
       estado: "Completado"
+    },
+    {
+      id: 10,
+      tarea: "Implementar Nginx como reverse proxy para la aplicación",
+      estado: "Completado"
     }
   ];
 
@@ -590,7 +610,7 @@ app.get("/api/tareas", (req, res) => {
           <p class="description">
             Esta sección muestra las tareas principales realizadas para completar la
             implementación de la aplicación, el despliegue en la nube, la automatización CI/CD,
-            el monitoreo, la base de datos y la seguridad básica.
+            el monitoreo, la base de datos, Nginx y la seguridad básica.
           </p>
         </div>
 
@@ -614,7 +634,8 @@ app.get("/api/tareas", (req, res) => {
           <p>
             Todas las actividades principales del proyecto se encuentran completadas,
             incluyendo aplicación web, contenerización, repositorio GitHub,
-            despliegue cloud, pipeline CI/CD, monitoreo, base de datos y seguridad básica.
+            despliegue cloud, pipeline CI/CD, monitoreo, base de datos,
+            Nginx como reverse proxy y seguridad básica.
           </p>
         </div>
 
@@ -712,8 +733,13 @@ app.get("/monitor", (req, res) => {
           </div>
 
           <div class="info-item">
-            <span>Puerto</span>
+            <span>Puerto interno</span>
             <strong>${monitorData.puerto}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Entrada pública</span>
+            <strong>Puerto 80 mediante Nginx</strong>
           </div>
 
           <div class="info-item">
@@ -739,7 +765,8 @@ app.get("/monitor", (req, res) => {
           <h2>Seguridad Básica Aplicada</h2>
           <p>
             El despliegue utiliza acceso SSH mediante llaves, GitHub Secrets para proteger
-            credenciales y reglas de firewall para controlar el acceso a la máquina virtual.
+            credenciales, Nginx como punto de entrada HTTP y reglas de firewall para controlar
+            el acceso a la máquina virtual.
           </p>
         </div>
 
@@ -761,7 +788,9 @@ app.get("/monitoreo", (req, res) => {
 
 app.get("/db", async (req, res) => {
   try {
-    const result = await pool.query("SELECT NOW() AS fecha_servidor, current_database() AS base_datos, current_user AS usuario");
+    const result = await pool.query(
+      "SELECT NOW() AS fecha_servidor, current_database() AS base_datos, current_user AS usuario"
+    );
 
     const dbData = result.rows[0];
 
