@@ -27,16 +27,22 @@ jobs:
       - name: Construir imagen Docker
         run: docker build -t proyecto-devops-so-final .
 
-      - name: Desplegar en Google Cloud por SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.GCP_HOST }}
-          username: ${{ secrets.GCP_USER }}
-          key: ${{ secrets.GCP_SSH_KEY }}
-          port: 22
-          script: |
-            cd ~/proyecto-devops-so-final
-            git pull origin main
-            docker compose down
-            docker compose up -d --build
+      - name: Preparar llave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GCP_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/gcp_key
+          chmod 600 ~/.ssh/gcp_key
+
+      - name: Probar conexion SSH
+        run: |
+          ssh -i ~/.ssh/gcp_key -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "whoami"
+
+      - name: Desplegar en Google Cloud
+        run: |
+          ssh -i ~/.ssh/gcp_key -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "
+            cd ~/proyecto-devops-so-final &&
+            git pull origin main &&
+            docker compose down &&
+            docker compose up -d --build &&
             docker ps
+          "
