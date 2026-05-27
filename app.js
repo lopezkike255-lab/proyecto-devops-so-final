@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
     <h1>Proyecto DevOps - Sistemas Operativos II</h1>
     <p>Aplicacion web desplegada en contenedores Docker.</p>
     <p>Infraestructura cloud con CI/CD.</p>
-  <p>Despliegue automatico ejecutado con GitHub Actions.</p>
+    <p>Pipeline CI/CD actualizado y desplegado desde GitHub Actions.</p>
   `);
 });
 
@@ -38,12 +38,17 @@ app.get("/api/tareas", (req, res) => {
     {
       id: 3,
       tarea: "Subir codigo a GitHub",
-      estado: "En proceso"
+      estado: "Completado"
     },
     {
       id: 4,
-      tarea: "Desplegar en AWS",
-      estado: "Pendiente"
+      tarea: "Desplegar en Google Cloud",
+      estado: "Completado"
+    },
+    {
+      id: 5,
+      tarea: "Implementar pipeline CI/CD con GitHub Actions",
+      estado: "En proceso"
     }
   ]);
 });
