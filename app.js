@@ -1,9 +1,26 @@
 const express = require("express");
+const os = require("os");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+const formatBytes = (bytes) => {
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  if (bytes === 0) return "0 Bytes";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+};
+
+const formatUptime = (seconds) => {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  return `${days}d ${hours}h ${minutes}m ${secs}s`;
+};
 
 const layout = (title, content) => `
   <!DOCTYPE html>
@@ -137,6 +154,26 @@ const layout = (title, content) => `
         line-height: 1.7;
       }
 
+      .warning-box {
+        margin-top: 25px;
+        background: #fffbeb;
+        border: 1px solid #facc15;
+        border-radius: 18px;
+        padding: 22px;
+        text-align: center;
+      }
+
+      .warning-box h2 {
+        color: #92400e;
+        margin-bottom: 10px;
+      }
+
+      .warning-box p {
+        color: #92400e;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
       .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -149,6 +186,7 @@ const layout = (title, content) => `
         border: 1px solid #e2e8f0;
         border-radius: 14px;
         padding: 20px;
+        text-align: left;
       }
 
       .info-item span {
@@ -295,6 +333,7 @@ app.get("/", (req, res) => {
         <div class="buttons">
           <a href="/health" class="button primary">Ver estado de la API</a>
           <a href="/api/tareas" class="button secondary">Ver tareas del proyecto</a>
+          <a href="/monitor" class="button secondary">Ver monitoreo</a>
         </div>
       </div>
 
@@ -330,6 +369,22 @@ app.get("/", (req, res) => {
           <p>
             Se configuró un pipeline CI/CD que automatiza la construcción,
             prueba y despliegue de la aplicación.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Monitoreo</h3>
+          <p>
+            Se implementó una sección de monitoreo básico para verificar el estado,
+            tiempo activo y consumo de memoria del servicio.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Seguridad Básica</h3>
+          <p>
+            Se aplicaron llaves SSH, GitHub Secrets y reglas de firewall para controlar
+            accesos y proteger credenciales del despliegue.
           </p>
         </div>
       </div>
@@ -409,6 +464,7 @@ app.get("/health", (req, res) => {
         <div class="buttons">
           <a href="/" class="button primary">Regresar al inicio</a>
           <a href="/api/tareas" class="button secondary">Ver tareas</a>
+          <a href="/monitor" class="button secondary">Ver monitoreo</a>
         </div>
       </div>
       `
@@ -447,6 +503,16 @@ app.get("/api/tareas", (req, res) => {
       id: 6,
       tarea: "Configurar despliegue automático con GitHub Actions",
       estado: "Completado"
+    },
+    {
+      id: 7,
+      tarea: "Agregar monitoreo básico del servicio",
+      estado: "Completado"
+    },
+    {
+      id: 8,
+      tarea: "Aplicar seguridad básica con SSH, Secrets y Firewall",
+      estado: "Completado"
     }
   ];
 
@@ -478,7 +544,8 @@ app.get("/api/tareas", (req, res) => {
 
           <p class="description">
             Esta sección muestra las tareas principales realizadas para completar la
-            implementación de la aplicación, el despliegue en la nube y la automatización CI/CD.
+            implementación de la aplicación, el despliegue en la nube, la automatización CI/CD,
+            el monitoreo y la seguridad básica.
           </p>
         </div>
 
@@ -502,18 +569,147 @@ app.get("/api/tareas", (req, res) => {
           <p>
             Todas las actividades principales del proyecto se encuentran completadas,
             incluyendo aplicación web, contenerización, repositorio GitHub,
-            despliegue cloud y pipeline CI/CD.
+            despliegue cloud, pipeline CI/CD, monitoreo y seguridad básica.
           </p>
         </div>
 
         <div class="buttons">
           <a href="/" class="button primary">Regresar al inicio</a>
           <a href="/health" class="button secondary">Ver estado de la API</a>
+          <a href="/monitor" class="button secondary">Ver monitoreo</a>
         </div>
       </div>
       `
     )
   );
+});
+
+app.get("/monitor", (req, res) => {
+  const memoryUsage = process.memoryUsage();
+
+  const monitorData = {
+    estado: "Operativo",
+    uptimeAplicacion: formatUptime(process.uptime()),
+    uptimeServidor: formatUptime(os.uptime()),
+    memoriaRSS: formatBytes(memoryUsage.rss),
+    heapUsado: formatBytes(memoryUsage.heapUsed),
+    heapTotal: formatBytes(memoryUsage.heapTotal),
+    plataforma: os.platform(),
+    arquitectura: os.arch(),
+    hostname: os.hostname(),
+    puerto: PORT,
+    fechaRevision: new Date().toLocaleString("es-GT")
+  };
+
+  res.send(
+    layout(
+      "Monitoreo del Sistema",
+      `
+      <div class="panel center">
+        <div class="badge">Monitoreo Básico</div>
+
+        <h1>Monitoreo del Sistema</h1>
+
+        <p class="subtitle">
+          Supervisión básica del servicio desplegado en Google Cloud
+        </p>
+
+        <p class="description">
+          Esta sección muestra métricas básicas del estado de la aplicación,
+          consumo de memoria, tiempo activo y datos generales del entorno de ejecución.
+        </p>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Estado</span>
+            <strong>${monitorData.estado}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Tiempo activo de la aplicación</span>
+            <strong>${monitorData.uptimeAplicacion}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Tiempo activo del servidor</span>
+            <strong>${monitorData.uptimeServidor}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Memoria RSS</span>
+            <strong>${monitorData.memoriaRSS}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Heap usado</span>
+            <strong>${monitorData.heapUsado}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Heap total</span>
+            <strong>${monitorData.heapTotal}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Plataforma</span>
+            <strong>${monitorData.plataforma}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Arquitectura</span>
+            <strong>${monitorData.arquitectura}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Hostname</span>
+            <strong>${monitorData.hostname}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Puerto</span>
+            <strong>${monitorData.puerto}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Última revisión</span>
+            <strong>${monitorData.fechaRevision}</strong>
+          </div>
+
+          <div class="info-item">
+            <span>Proveedor Cloud</span>
+            <strong>Google Cloud</strong>
+          </div>
+        </div>
+
+        <div class="status-box">
+          <h2>Servicio Operativo</h2>
+          <p>
+            La aplicación se encuentra en ejecución y responde correctamente desde
+            el entorno contenerizado desplegado en la nube.
+          </p>
+        </div>
+
+        <div class="warning-box">
+          <h2>Seguridad Básica Aplicada</h2>
+          <p>
+            El despliegue utiliza acceso SSH mediante llaves, GitHub Secrets para proteger
+            credenciales y reglas de firewall para controlar el acceso a la máquina virtual.
+          </p>
+        </div>
+
+        <div class="buttons">
+          <a href="/" class="button primary">Regresar al inicio</a>
+          <a href="/health" class="button secondary">Ver estado de la API</a>
+          <a href="/api/tareas" class="button secondary">Ver tareas</a>
+        </div>
+      </div>
+      `
+    )
+  );
+});
+
+app.get("/monitoreo", (req, res) => {
+  res.redirect("/monitor");
 });
 
 app.listen(PORT, () => {
