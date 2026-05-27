@@ -40,7 +40,7 @@ jobs:
 
       - name: Probar conexion SSH
         run: |
-          ssh -i ~/.ssh/gcp_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no lopezkike255@35.253.218.105 "whoami"
+          ssh -vvv -i ~/.ssh/gcp_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no lopezkike255@35.253.218.105 "whoami"
 
       - name: Desplegar en Google Cloud
         run: |
