@@ -32,7 +32,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.GCP_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/gcp_key
           chmod 600 ~/.ssh/gcp_key
-
+      - name: Verificar huella de llave SSH
+        run: |
+          ssh-keygen -y -f ~/.ssh/gcp_key > ~/.ssh/gcp_key.pub
+          ssh-keygen -lf ~/.ssh/gcp_key.pub
       - name: Probar conexion SSH
         run: |
           ssh -i ~/.ssh/gcp_key -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "whoami"
