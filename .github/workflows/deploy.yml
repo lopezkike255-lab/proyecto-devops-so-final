@@ -30,19 +30,21 @@ jobs:
       - name: Preparar llave SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.GCP_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/gcp_key
+          printf '%s' "${{ secrets.GCP_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/gcp_key
           chmod 600 ~/.ssh/gcp_key
+
       - name: Verificar huella de llave SSH
         run: |
           ssh-keygen -y -f ~/.ssh/gcp_key > ~/.ssh/gcp_key.pub
           ssh-keygen -lf ~/.ssh/gcp_key.pub
+
       - name: Probar conexion SSH
         run: |
-          ssh -i ~/.ssh/gcp_key -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "whoami"
+          ssh -i ~/.ssh/gcp_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "whoami"
 
       - name: Desplegar en Google Cloud
         run: |
-          ssh -i ~/.ssh/gcp_key -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "
+          ssh -i ~/.ssh/gcp_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=no ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "
             cd ~/proyecto-devops-so-final &&
             git pull origin main &&
             docker compose down &&
