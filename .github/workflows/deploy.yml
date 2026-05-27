@@ -35,8 +35,9 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           port: 22
           script: |
-  cd ~/proyecto-devops-so-final
-  git pull origin main
-  docker compose down
-  docker compose up -d --build
-  docker ps
+            cd ~/proyecto-devops-so-final
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
+            docker ps
+            
