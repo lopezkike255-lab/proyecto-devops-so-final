@@ -1,10 +1,19 @@
 const express = require("express");
 const os = require("os");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+const pool = new Pool({
+  host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT || 5432,
+  user: process.env.DB_USER || "devops_user",
+  password: process.env.DB_PASSWORD || "devops_password",
+  database: process.env.DB_NAME || "devops_db"
+});
 
 const formatBytes = (bytes) => {
   const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -174,6 +183,26 @@ const layout = (title, content) => `
         line-height: 1.6;
       }
 
+      .error-box {
+        margin-top: 35px;
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        border-radius: 18px;
+        padding: 25px;
+        text-align: center;
+      }
+
+      .error-box h2 {
+        color: #991b1b;
+        margin-bottom: 10px;
+      }
+
+      .error-box p {
+        color: #b91c1c;
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
       .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -199,6 +228,7 @@ const layout = (title, content) => `
       .info-item strong {
         color: #0f172a;
         font-size: 18px;
+        word-break: break-word;
       }
 
       .table-wrapper {
@@ -334,6 +364,7 @@ app.get("/", (req, res) => {
           <a href="/health" class="button primary">Ver estado de la API</a>
           <a href="/api/tareas" class="button secondary">Ver tareas del proyecto</a>
           <a href="/monitor" class="button secondary">Ver monitoreo</a>
+          <a href="/db" class="button secondary">Ver base de datos</a>
         </div>
       </div>
 
@@ -377,6 +408,14 @@ app.get("/", (req, res) => {
           <p>
             Se implementó una sección de monitoreo básico para verificar el estado,
             tiempo activo y consumo de memoria del servicio.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Base de Datos</h3>
+          <p>
+            Se integró PostgreSQL como contenedor dentro de Docker Compose,
+            permitiendo validar conectividad entre servicios.
           </p>
         </div>
 
@@ -465,6 +504,7 @@ app.get("/health", (req, res) => {
           <a href="/" class="button primary">Regresar al inicio</a>
           <a href="/api/tareas" class="button secondary">Ver tareas</a>
           <a href="/monitor" class="button secondary">Ver monitoreo</a>
+          <a href="/db" class="button secondary">Ver base de datos</a>
         </div>
       </div>
       `
@@ -513,6 +553,11 @@ app.get("/api/tareas", (req, res) => {
       id: 8,
       tarea: "Aplicar seguridad básica con SSH, Secrets y Firewall",
       estado: "Completado"
+    },
+    {
+      id: 9,
+      tarea: "Integrar base de datos PostgreSQL en Docker Compose",
+      estado: "Completado"
     }
   ];
 
@@ -545,7 +590,7 @@ app.get("/api/tareas", (req, res) => {
           <p class="description">
             Esta sección muestra las tareas principales realizadas para completar la
             implementación de la aplicación, el despliegue en la nube, la automatización CI/CD,
-            el monitoreo y la seguridad básica.
+            el monitoreo, la base de datos y la seguridad básica.
           </p>
         </div>
 
@@ -569,7 +614,7 @@ app.get("/api/tareas", (req, res) => {
           <p>
             Todas las actividades principales del proyecto se encuentran completadas,
             incluyendo aplicación web, contenerización, repositorio GitHub,
-            despliegue cloud, pipeline CI/CD, monitoreo y seguridad básica.
+            despliegue cloud, pipeline CI/CD, monitoreo, base de datos y seguridad básica.
           </p>
         </div>
 
@@ -577,6 +622,7 @@ app.get("/api/tareas", (req, res) => {
           <a href="/" class="button primary">Regresar al inicio</a>
           <a href="/health" class="button secondary">Ver estado de la API</a>
           <a href="/monitor" class="button secondary">Ver monitoreo</a>
+          <a href="/db" class="button secondary">Ver base de datos</a>
         </div>
       </div>
       `
@@ -701,6 +747,7 @@ app.get("/monitor", (req, res) => {
           <a href="/" class="button primary">Regresar al inicio</a>
           <a href="/health" class="button secondary">Ver estado de la API</a>
           <a href="/api/tareas" class="button secondary">Ver tareas</a>
+          <a href="/db" class="button secondary">Ver base de datos</a>
         </div>
       </div>
       `
@@ -710,6 +757,126 @@ app.get("/monitor", (req, res) => {
 
 app.get("/monitoreo", (req, res) => {
   res.redirect("/monitor");
+});
+
+app.get("/db", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW() AS fecha_servidor, current_database() AS base_datos, current_user AS usuario");
+
+    const dbData = result.rows[0];
+
+    res.send(
+      layout(
+        "Estado de Base de Datos",
+        `
+        <div class="panel center">
+          <div class="badge">PostgreSQL</div>
+
+          <h1>Estado de Base de Datos</h1>
+
+          <p class="subtitle">
+            Validación de conectividad entre la aplicación y el contenedor PostgreSQL
+          </p>
+
+          <p class="description">
+            Esta sección confirma que la aplicación Node.js puede comunicarse correctamente
+            con el servicio de base de datos ejecutado dentro de Docker Compose.
+          </p>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span>Estado de conexión</span>
+              <strong>Conectado</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Motor de base de datos</span>
+              <strong>PostgreSQL</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Host interno</span>
+              <strong>${process.env.DB_HOST || "db"}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Puerto</span>
+              <strong>${process.env.DB_PORT || "5432"}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Base de datos</span>
+              <strong>${dbData.base_datos}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Usuario</span>
+              <strong>${dbData.usuario}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Fecha del servidor DB</span>
+              <strong>${dbData.fecha_servidor}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Contenedor</span>
+              <strong>db-devops-so-final</strong>
+            </div>
+          </div>
+
+          <div class="status-box">
+            <h2>Base de Datos Operativa</h2>
+            <p>
+              La conexión con PostgreSQL fue establecida correctamente.
+              Esto confirma la comunicación interna entre contenedores dentro de Docker Compose.
+            </p>
+          </div>
+
+          <div class="buttons">
+            <a href="/" class="button primary">Regresar al inicio</a>
+            <a href="/health" class="button secondary">Ver estado de la API</a>
+            <a href="/monitor" class="button secondary">Ver monitoreo</a>
+            <a href="/api/tareas" class="button secondary">Ver tareas</a>
+          </div>
+        </div>
+        `
+      )
+    );
+  } catch (error) {
+    res.send(
+      layout(
+        "Error de Base de Datos",
+        `
+        <div class="panel center">
+          <div class="badge">PostgreSQL</div>
+
+          <h1>Error de Conexión a Base de Datos</h1>
+
+          <p class="subtitle">
+            No se pudo establecer comunicación con el contenedor PostgreSQL.
+          </p>
+
+          <div class="error-box">
+            <h2>Conexión fallida</h2>
+            <p>
+              Error detectado: ${error.message}
+            </p>
+          </div>
+
+          <div class="buttons">
+            <a href="/" class="button primary">Regresar al inicio</a>
+            <a href="/monitor" class="button secondary">Ver monitoreo</a>
+          </div>
+        </div>
+        `
+      )
+    );
+  }
+});
+
+app.get("/database", (req, res) => {
+  res.redirect("/db");
 });
 
 app.listen(PORT, () => {
