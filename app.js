@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
     <h1>Proyecto DevOps - Sistemas Operativos II</h1>
     <p>Aplicacion web desplegada en contenedores Docker.</p>
     <p>Infraestructura cloud con CI/CD.</p>
-    <p>Version final del proyecto funcionando correctamente.</p>
+  <p>Despliegue automatico ejecutado con GitHub Actions.</p>
   `);
 });
 
