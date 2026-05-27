@@ -333,7 +333,7 @@ const layout = (title, content) => `
       ${content}
 
       <div class="footer">
-        Autor: Jonathan Enrique Toc López | Proyecto de Sistemas Operativos II
+        Autor: Jonathan Enrique Toc | Proyecto de Sistemas Operativos II
       </div>
     </div>
   </body>
