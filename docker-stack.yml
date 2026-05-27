@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  app:
+    image: proyecto-devops-so-final-app:latest
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: devops_user
+      DB_PASSWORD: devops_password
+      DB_NAME: devops_db
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: devops_user
+      POSTGRES_PASSWORD: devops_password
+      POSTGRES_DB: devops_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+volumes:
+  postgres_data:
